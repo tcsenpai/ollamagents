@@ -1,41 +1,33 @@
+// Import required modules and classes
 import { OllamaAPI } from './ollamapi';
 import dotenv from 'dotenv';
 import readline from 'readline';
 import * as term from 'terminal-kit';
 
+// Load environment variables
 dotenv.config();
 
+// Initialize OllamaAPI with the URL from environment variables
 const ollama_url = process.env.OLLAMA_URL as string;
-const systemPrompt = `You are a Linux command interpreter. Your task is to convert natural language queries or commands into appropriate Linux commands. Always respond with a valid JSON object containing the following keys:
-1. 'commands': An array of strings, each representing a Linux command to execute. If multiple commands are needed, list them in the order they should be executed.
-2. 'explanation': A brief explanation of what the command(s) do (string).
-3. 'caution': Any warnings or cautions about using the command(s), if applicable (string or null).
+const ollama = new OllamaAPI(ollama_url, 'llama3.1');
 
-Guidelines:
-- Provide a single command when possible, but use multiple commands or command chains (using pipes | or && ) when necessary to achieve the desired result.
-- If suggesting multiple commands, explain how they work together.
-- Always use existing and working Linux commands.
-- If you cannot interpret the input or if it's not applicable to Linux, return a JSON object with an 'error' key explaining the issue.
-
-Do not include any text outside of the JSON structure in your response.
-
-The produced JSON should be valid and parseable by JSON.parse() in JavaScript. For such reason, you should not include \` and \`\`\`json in your response, or similar syntax.`;
-
-const ollama = new OllamaAPI(ollama_url, 'llama3.1', systemPrompt);
-
+// Create readline interface for user input
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
 async function main() {
+  // Display welcome message
   term.terminal.bold.cyan('Welcome to the Linux Command Assistant. Type \'exit\' to quit.\n\n');
 
   while (true) {
+    // Prompt user for input
     term.terminal.green('Enter your command or question: \n');
+    term.terminal.bold("Remember to prefix your command with '!' to execute commands.\n");
     const input = await new Promise<string>(resolve => rl.question('', resolve));
-    term.terminal('\n');
 
+    // Check if user wants to exit
     if (input.toLowerCase() === 'exit') {
       term.terminal.yellow('Goodbye!\n');
       rl.close();
@@ -43,23 +35,48 @@ async function main() {
     }
 
     try {
-      const response = await ollama.chat(input);
-      const parsedResponse = JSON.parse(response);
+      // Check if the command should be executed
+      const executeCommand = input.startsWith('!');
+      const cleanInput = executeCommand ? input.slice(1) : input;
+      
+      // Send request to OllamaAPI
+      const response = await ollama.chat(cleanInput, executeCommand);
 
-      if (parsedResponse.error) {
-        term.terminal.red('Error: ').white(parsedResponse.error + '\n');
+      if (response.error) {
+        // Display error if any
+        term.terminal.red('Error: ').white(response.error + '\n');
       } else {
+        // Display commands
         term.terminal.bold.blue('Command(s):\n\n');
-        parsedResponse.commands.forEach((cmd: string, index: number) => {
+        response.commands.forEach((cmd: string) => {
           term.terminal.white(`${cmd}\n`);
         });
-        term.terminal('\n\n');
-        term.terminal.bold.magenta('Explanation: ').white(parsedResponse.explanation + '\n');
-        if (parsedResponse.caution) {
-          term.terminal.bold.yellow('Caution: ').white(parsedResponse.caution + '\n');
+        term.terminal('\n');
+
+        // Display explanation
+        term.terminal.bold.magenta('Explanation: ').white(response.explanation + '\n');
+
+        // Display caution if any
+        if (response.caution) {
+          term.terminal.bold.yellow('Caution: ').white(response.caution + '\n');
+        }
+
+        // Display execution output or error if command was executed
+        if (executeCommand) {
+          if (response.execution_results) {
+            term.terminal.bold.green('Execution Results:\n');
+            response.execution_results.forEach(result => {
+              term.terminal.bold.blue(`Command: ${result.command}\n`);
+              term.terminal.white(`Output:\n${result.output}\n\n`);
+            });
+          }
+          if (response.error) {
+            term.terminal.bold.red('Execution Error:\n').white(response.error + '\n');
+          }
         }
       }
     } catch (error) {
+      // Display any unexpected errors
       term.terminal.red('An error occurred: ').white((error as Error).message + '\n');
     }
 
@@ -67,4 +84,5 @@ async function main() {
   }
 }
 
+// Start the application
 main();

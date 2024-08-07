@@ -5,8 +5,10 @@ OllamaAgents is a TypeScript-based CLI application that provides a Linux command
 ## Features
 
 - Convert natural language queries to Linux commands
+- Generate single or multiple commands as needed
 - Provide explanations for generated commands
 - Offer cautions for potentially dangerous operations
+- Optional command execution
 - Colorful and interactive CLI interface
 
 ## Prerequisites
@@ -37,14 +39,25 @@ OllamaAgents is a TypeScript-based CLI application that provides a Linux command
 
 To start the application, run:
 
-```
-yarn start
-```
+`yarn start`
 
 
-Once started, you can enter natural language queries or commands. The application will interpret your input and provide the corresponding Linux command, along with an explanation and any necessary cautions.
+Once started, you can enter natural language queries or commands. The application will interpret your input and provide the corresponding Linux command(s), along with an explanation and any necessary cautions.
+
+To execute a command, prefix your input with '!'. For example:
+
+`!list files in current directory`
+
+
+This will interpret the command, show you the Linux command(s) it plans to run, and then execute them, displaying the output.
 
 Type 'exit' to quit the application.
+
+## Warning and Disclaimer
+
+**CAUTION:** This application can execute system commands. Be extremely careful when using the execution feature, especially with commands that modify your system or files. Always review the generated commands before execution and ensure you understand their effects.
+
+The authors and contributors of OllamaAgents are not responsible for any damage or data loss caused by the execution of commands through this application. Use at your own risk.
 
 ## Development
 
@@ -74,5 +87,6 @@ Contributions, issues, and feature requests are welcome. Feel free to check issu
 
 ## Acknowledgments
 
-- Ollama for providing the underlying language model capabilities
-- The TypeScript and Node.js communities for their excellent tools and libraries
+- Ollama for providing the underlying language model capabilities and API
+- Claude Sonnet 3.5 and Cursor IDE for providing such a great AI model and IDE
+- All the enthusiasts who keep the open-source community alive
