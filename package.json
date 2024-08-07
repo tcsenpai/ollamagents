@@ -1,0 +1,21 @@
+{
+  "name": "ollamagents",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "author": "tcsenpai <dev@tcsenpai.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx main.ts"
+  },
+  "dependencies": {
+    "axios": "^1.7.3",
+    "dotenv": "^16.4.5",
+    "terminal-kit": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.1.0",
+    "@types/terminal-kit": "^2.5.6",
+    "tsx": "^4.16.5",
+    "typescript": "^5.0.0"
+  }
+}
