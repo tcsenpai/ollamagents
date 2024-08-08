@@ -17,6 +17,26 @@ const rl = readline.createInterface({
   output: process.stdout
 });
 
+function createSpinner() {
+  const spinnerFrames = ['|', '/', '-', '\\'];
+  let currentFrame = 0;
+  let spinnerInterval: NodeJS.Timeout;
+
+  return {
+    start: () => {
+      process.stdout.write('Processing your request... ');
+      spinnerInterval = setInterval(() => {
+        process.stdout.write(`\r${spinnerFrames[currentFrame]} Processing your request...`);
+        currentFrame = (currentFrame + 1) % spinnerFrames.length;
+      }, 100);
+    },
+    stop: () => {
+      clearInterval(spinnerInterval);
+      process.stdout.write('\r\x1b[K');
+    }
+  };
+}
+
 async function main() {
   // Display welcome message
   term.terminal.bold.cyan('Welcome to the Linux Command Assistant. Type \'exit\' to quit.\n\n');
@@ -39,8 +59,15 @@ async function main() {
       const executeCommand = input.startsWith('!');
       const cleanInput = executeCommand ? input.slice(1) : input;
       
+      // Create and start the spinner
+      const spinner = createSpinner();
+      spinner.start();
+
       // Send request to OllamaAPI
       const response = await ollama.chat(cleanInput, executeCommand);
+
+      // Stop the spinner
+      spinner.stop();
 
       if (response.error) {
         // Display error if any
