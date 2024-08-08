@@ -1,8 +1,6 @@
 # OllamaAgents
 
-[![asciicast](https://asciinema.org/a/671202.svg)](https://asciinema.org/a/671202)
-
-Click the image for a live demo
+![Demo GIF](demo.gif)
 
 OllamaAgents is a TypeScript-based CLI application that provides a Linux command interpreter using the Ollama API. It converts natural language queries into appropriate Linux commands, executing them if requested, offering explanations and cautions when necessary.
 
